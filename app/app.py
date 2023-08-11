@@ -70,6 +70,7 @@ class create_puzzle(App):
 
         layout.row_default_height = layout.minimum_height
         layout.col_default_height = layout.minimum_width
+        layout.pos_hint = {"center_x": 0.9, "center_y": 0.3}
 
         return layout
 

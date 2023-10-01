@@ -1,20 +1,21 @@
 import numpy as np 
 
+
 class grid():
     def __init__(self, arr):
         self.grid = arr
 
     # Helper function for Flood-Fill
-    def is_valid(self, grid, square, cur_color):
-        if square[0] == 0  or square[0] == len(grid) or square[1] == 0 or square[1] == len(grid[0]) or grid[square[0],square[1]] == -3:
+    def is_valid(self, grid, square):
+        if square[0] == -1 or square[0] == grid.shape[0] or square[1] == -1 or square[1] == grid.shape[1] or grid[square[0],square[1]] == -3:
             return False
         return True
     
-
     # Flood-Fill algorithm to find areas of the grid
-    def flood_fill(self, grid, square, cur_color):
+    def flood_fill(self, grid, square):
         squares_in = []
         check_grid = grid.copy()
+        check_grid[square[0],square[1]] = -3
         queue = []
         queue.append(square)
         squares_in.append(square)
@@ -34,16 +35,17 @@ class grid():
                 squares_in.append([posX,posY+1])
                 check_grid[posX, posY+1] = -3
                 queue.append([posX, posY+1])
-        
+
             if self.is_valid(check_grid, [posX-1,posY]):
                 squares_in.append([posX-1, posY])
                 check_grid[posX-1, posY] = -3
                 queue.append([posX-1, posY])
-        
+
             if self.is_valid(check_grid, [posX,posY-1]):
                 squares_in.append([posX, posY-1])
                 check_grid[posX, posY-1] = -3
                 queue.append([posX, posY-1])
+
         return squares_in
 
 
@@ -61,7 +63,16 @@ class grid():
     # Check if 2 or more colors are in the same outline by Flood-Fill algorithm
     def constraint_color(self, grid, square):
         const_nums = [2,3,4,5,6,7,8,9,27,28,29,30,31,32,33,34]
-        pass
+        if grid[square[0],square[1]] in const_nums: 
+            checkers = self.flood_fill(self.grid, square)
+            if len(checkers) == grid.shape[0]*grid.shape[1]-np.count_nonzero(self.grid == -3):
+                return True 
+            else:
+                for new_sq in checkers:
+                    if grid[new_sq[0], new_sq[1]] in const_nums:
+                        if grid[new_sq[0], new_sq[1]] != grid[square[0],square[1]]:
+                            return False 
+        return True 
     
     # Check if all dots on the path has been met
     def constraint_hexagon(self, grid, square):
@@ -115,4 +126,3 @@ class grid():
         
         pass        
     
-

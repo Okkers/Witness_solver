@@ -7,6 +7,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from functools import partial
 import block_dict
+import constraints
 # Unique symbols for each block
 amt_of_symbols = 38
 
@@ -68,6 +69,14 @@ def callback_solution(layout, arr, button):
             else:
                 arr[indx//(2*dim_x+1), indx%(2*dim_x+1)] = 0
     print(arr)
+    print("--------------")
+    heyo = constraints.grid(arr)
+    flood = heyo.flood_fill(arr, [5,3])
+    out = heyo.constraint_color(arr, [5,3])
+    print(flood)
+    print(out)
+    print("--------------")
+    print(arr)
 
 class create_puzzle(App):
 
@@ -113,7 +122,6 @@ class create_puzzle(App):
                                 width=20,
                                 pos = (400,100))
         sol_btn.bind(on_press=partial(callback_solution, layout, np_arr))
-
 
         layout.add_widget(sol_btn)
 

@@ -1,9 +1,12 @@
 import numpy as np 
 
-
 class grid():
-    def __init__(self, arr):
+    def __init__(self, arr, start, end):
+        self.start = start 
+        self.end = end
         self.grid = arr
+
+    checks = [(-1,0), (1,0), (0,-1), (0,1)]
 
     # Helper function for Flood-Fill
     def is_valid(self, grid, square):
@@ -50,9 +53,8 @@ class grid():
 
 
     # Check if we have made a path from start to finish by overwriting the -5 "start" and -10 "end" numbers.
-    # DONE
     def constraint_finished(self, start, end):
-        if start != -5 and end != -10:
+        if self.grid[start[0],start[1]] != -5 and self.grid[end[0],end[1]] != -10:
             return True
         return False
 
@@ -60,24 +62,37 @@ class grid():
     def constraint_next_to(self, grid):
         pass
 
-    # Check if 2 or more colors are in the same outline by Flood-Fill algorithm
-    def constraint_color(self, grid, square):
+    # Check if 2 or more colors are in the same area by Flood-Fill algorithm
+    def constraint_color(self, square):
         const_nums = [2,3,4,5,6,7,8,9,27,28,29,30,31,32,33,34]
-        if grid[square[0],square[1]] in const_nums: 
+        if self.grid[square[0],square[1]] in const_nums: 
             checkers = self.flood_fill(self.grid, square)
-            if len(checkers) == grid.shape[0]*grid.shape[1]-np.count_nonzero(self.grid == -3):
-                return True 
-            else:
+            
+            if self.constraint_finished(self.start, self.end):
                 for new_sq in checkers:
-                    if grid[new_sq[0], new_sq[1]] in const_nums:
-                        if grid[new_sq[0], new_sq[1]] != grid[square[0],square[1]]:
+                    if self.grid[new_sq[0], new_sq[1]] in const_nums:
+                        if self.grid[new_sq[0], new_sq[1]] != self.grid[square[0],square[1]]:
                             return False 
         return True 
     
     # Check if all dots on the path has been met
-    def constraint_hexagon(self, grid, square):
+    def constraint_hexagon(self, square):
         const_nums = [-1,-2]
-        pass
+
+        if self.grid[square[0], square[1]] in const_nums: 
+            if self.constraint_finished(self.start, self.end):
+                return False
+            counter = 0
+            for x,y in self.checks:
+                new_x, new_y = square[0]+x, square[1]+y
+                if new_x == -1 or new_y == -1 or new_x == len(self.grid) or new_y == len(self.grid):
+                    counter += 1 
+                elif self.grid[new_x, new_y] not in [-1,-2,-5,-10,0]:
+                    counter += 1 
+            if counter > 3:
+                return False
+         
+        return True 
     
     # Check if the Straight tetris piece has been made in the grid 
     def constraint_tetris_straight(self, grid, square):
@@ -114,15 +129,19 @@ class grid():
         const_num = 35
         pass
 
-    def all_constraints(self, grid, square):
-        # if grid[square[0],square[1]] in [2,3,4,5,6,7,8,9,27,28,29,30,31,32,33,34]:
-        #     self.constraint_color(grid, square)
-        #     self.constraint_star(grid, square)
-
-        # elif grid[square[0],square[1]] in [-1,-2]:
-        #     self.constraint_hexagon(grid, square)
-
-        # elif grid[square[0],square[1]] in [-1,-2]:
-        
-        pass        
+    def all_constraints(self, square):
+        if self.grid[square[0], square[1]] in [2,3,4,5,6,7,8,9,27,28,29,30,31,32,33,34]:
+            if not self.constraint_color(square):
+                return False
+        if self.grid[square[0], square[1]] in [-1,-2]:
+            if not self.constraint_hexagon(square):
+                return False
+        # ...
+        return True
     
+    def check_all(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid)):
+                if not self.all_constraints((i,j)):
+                    return False
+        return True
